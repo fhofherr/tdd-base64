@@ -61,9 +61,9 @@ public class OctetRegrouper {
 
     private static byte[] extract6BitGroups(int joinedOctets) {
         byte[] sixBitGroups = new byte[4];
-        sixBitGroups[0] = (byte) (joinedOctets & FIRST_6_BIT_OF_24 >> 18);
-        sixBitGroups[1] = (byte) (joinedOctets & SECOND_6_BIT_OF_24 >> 12);
-        sixBitGroups[2] = (byte) (joinedOctets & THIRD_6_BIT_OF_24 >> 6);
+        sixBitGroups[0] = (byte) ((joinedOctets & FIRST_6_BIT_OF_24) >> 18);
+        sixBitGroups[1] = (byte) ((joinedOctets & SECOND_6_BIT_OF_24) >> 12);
+        sixBitGroups[2] = (byte) ((joinedOctets & THIRD_6_BIT_OF_24) >> 6);
         sixBitGroups[3] = (byte) (joinedOctets & FOURTH_6_BIT_OF_24);
         return sixBitGroups;
     }
@@ -85,17 +85,17 @@ public class OctetRegrouper {
         switch (remainingOctets.length) {
             case 1:
                 extractedGroups = new byte[] {
-                        (byte) (joinedOctets & FIRST_6_BIT_OF_8 >> 2),
-                        (byte) (joinedOctets & LAST_2_BIT_OF_8),
+                        (byte) ((joinedOctets & FIRST_6_BIT_OF_8) >> 2),
+                        (byte) ((joinedOctets & LAST_2_BIT_OF_8) << 4),
                         (byte) 0x40,
                         (byte) 0x40
                 };
                 break;
             case 2:
                 extractedGroups = new byte[] {
-                    (byte) (joinedOctets & FIRST_6_BIT_OF_16 >> 10),
-                    (byte) (joinedOctets & SECOND_6_BIT_OF_16 >> 4),
-                    (byte) (joinedOctets & LAST_4_BIT_OF_16),
+                    (byte) ((joinedOctets & FIRST_6_BIT_OF_16) >> 10),
+                    (byte) ((joinedOctets & SECOND_6_BIT_OF_16) >> 4),
+                    (byte) ((joinedOctets & LAST_4_BIT_OF_16) << 2),
                     (byte) 0x40
                 };
                 break;
