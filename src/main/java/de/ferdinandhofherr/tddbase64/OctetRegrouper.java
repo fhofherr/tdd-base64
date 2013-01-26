@@ -4,11 +4,15 @@ import java.util.Arrays;
 
 public class OctetRegrouper {
 
-    private static final int FIRST_6_BIT  = 0xFC0000;
-    private static final int SECOND_6_BIT = 0x03F000;
-    private static final int THIRD_6_BIT  = 0x000FC0;
-    private static final int FOURTH_6_BIT = 0x00003F;
-    private static final int LAST_2_BIT   = 0x000003;
+    private static final int LAST_4_BIT_OF_16 = 0x000F;
+    private static final int SECOND_6_BIT_OF_16 = 0x03F0;
+    private static final int FIRST_6_BIT_OF_16 = 0xFC00;
+    private static final int FIRST_6_BIT_OF_24  = 0xFC0000;
+    private static final int SECOND_6_BIT_OF_24 = 0x03F000;
+    private static final int THIRD_6_BIT_OF_24  = 0x000FC0;
+    private static final int FOURTH_6_BIT_OF_24 = 0x00003F;
+    private static final int FIRST_6_BIT_OF_8 = 0xFC;
+    private static final int LAST_2_BIT_OF_8  = 0x03;
 
     public static byte[] regroup(byte[] inputOctets) {
         byte[] firstThreeOctets = getFirstThreeOctets(inputOctets);
@@ -23,7 +27,9 @@ public class OctetRegrouper {
             firstThreeOctets = getFirstThreeOctets(remainingOctets);
             remainingOctets = getRemainingOctets(remainingOctets);
         };
-        sixBitGroups = addPadding(remainingOctets, sixBitGroups);
+        if (remainingOctets.length > 0) {
+            sixBitGroups = addPadding(remainingOctets, sixBitGroups);
+        }
 
         return sixBitGroups;
     }
@@ -55,10 +61,10 @@ public class OctetRegrouper {
 
     private static byte[] extract6BitGroups(int joinedOctets) {
         byte[] sixBitGroups = new byte[4];
-        sixBitGroups[0] = (byte) (joinedOctets & FIRST_6_BIT >> 18);
-        sixBitGroups[1] = (byte) (joinedOctets & SECOND_6_BIT >> 12);
-        sixBitGroups[2] = (byte) (joinedOctets & THIRD_6_BIT >> 6);
-        sixBitGroups[3] = (byte) (joinedOctets & FOURTH_6_BIT);
+        sixBitGroups[0] = (byte) (joinedOctets & FIRST_6_BIT_OF_24 >> 18);
+        sixBitGroups[1] = (byte) (joinedOctets & SECOND_6_BIT_OF_24 >> 12);
+        sixBitGroups[2] = (byte) (joinedOctets & THIRD_6_BIT_OF_24 >> 6);
+        sixBitGroups[3] = (byte) (joinedOctets & FOURTH_6_BIT_OF_24);
         return sixBitGroups;
     }
 
@@ -74,16 +80,28 @@ public class OctetRegrouper {
     }
 
     private static byte[] addPadding(byte[] remainingOctets, byte[] sixBitGroups) {
-        if (remainingOctets.length == 1) {
-            int joinedOctets = joinOctets(remainingOctets);
-            byte[] extractedGroups = new byte[] {
-                (byte) (joinedOctets & THIRD_6_BIT >> 6),
-                (byte) (joinedOctets & LAST_2_BIT),
-                (byte) 0x40,
-                (byte) 0x40
-            };
-            sixBitGroups = concat(sixBitGroups, extractedGroups);
+        int joinedOctets = joinOctets(remainingOctets);
+        byte[] extractedGroups = new byte[0];
+        switch (remainingOctets.length) {
+            case 1:
+                extractedGroups = new byte[] {
+                        (byte) (joinedOctets & FIRST_6_BIT_OF_8 >> 2),
+                        (byte) (joinedOctets & LAST_2_BIT_OF_8),
+                        (byte) 0x40,
+                        (byte) 0x40
+                };
+                break;
+            case 2:
+                extractedGroups = new byte[] {
+                    (byte) (joinedOctets & FIRST_6_BIT_OF_16 >> 10),
+                    (byte) (joinedOctets & SECOND_6_BIT_OF_16 >> 4),
+                    (byte) (joinedOctets & LAST_4_BIT_OF_16),
+                    (byte) 0x40
+                };
+                break;
+            default: throw new IllegalArgumentException("Only one or two octets may remain!");
         }
+        sixBitGroups = concat(sixBitGroups, extractedGroups);
         return sixBitGroups;
     }
 

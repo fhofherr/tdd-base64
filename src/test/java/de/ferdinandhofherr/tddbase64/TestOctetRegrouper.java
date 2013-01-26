@@ -34,4 +34,12 @@ public class TestOctetRegrouper {
 
         assertThat(OctetRegrouper.regroup(inputOctets)).isEqualTo(output6BitGroups);
     }
+
+    @Test
+    public void conversionFillsRemainderOfTwoOctetsWithOneGroupOf0x40() throws Exception {
+        byte[] inputOctets = {(byte) 0xFF, (byte) 0xFF};
+        byte[] output6BitGroups = {(byte) 0x3F, (byte) 0x3F, (byte) 0x0F, (byte) 0x40};
+
+        assertThat(OctetRegrouper.regroup(inputOctets)).isEqualTo(output6BitGroups);
+    }
 }
