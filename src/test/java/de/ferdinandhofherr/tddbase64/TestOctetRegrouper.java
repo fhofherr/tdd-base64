@@ -2,6 +2,8 @@ package de.ferdinandhofherr.tddbase64;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+import java.util.Arrays;
+
 import org.junit.Test;
 
 public class TestOctetRegrouper {
@@ -14,4 +16,14 @@ public class TestOctetRegrouper {
         assertThat(OctetRegrouper.regroup(inputOctets)).isEqualTo(output6BitGroups);
     }
 
+    @Test
+    public void convertsMultiplesOf3OctetsIntoMultiplesOf4groupsOf6Bits() throws Exception {
+        byte[] inputOctets = new byte[3 * 2];
+        byte[] output6BitGroups = new byte[4 * 2];
+
+        Arrays.fill(inputOctets, (byte) 0xFF);
+        Arrays.fill(output6BitGroups, (byte) 0x3F);
+
+        assertThat(OctetRegrouper.regroup(inputOctets)).isEqualTo(output6BitGroups);
+    }
 }
