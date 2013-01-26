@@ -1,0 +1,14 @@
+# Vim
+*~
+*.swp
+
+# Gralde
+build/
+.gradle/
+.cache
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
