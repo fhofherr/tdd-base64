@@ -1,0 +1,35 @@
+/* vim: set ft=groovy: */
+
+group = 'de.ferdinandhofherr.tddbase64'
+version = '0.1-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+dependencies {
+    testCompile "junit:junit:4.11"
+    testCompile "org.easytesting:fest-assert-core:2.0M8"
+}
+
+eclipse {
+    classpath {
+        downloadSources = true
+        downloadJavadoc = true
+    }
+}
+
+task mrpropper << {
+    // Remove all files and directories ignored by git.
+    def proc = "git clean -fdX".execute()
+    proc.in.eachLine { line -> logger.info(line) }
+    proc.waitFor()
+    if (proc.exitValue() == 0) {
+        logger.lifecycle("All files and directories ignored by git removed")
+    } else {
+        logger.warn("Git failed with exit status ${proc.exitValue()}")
+    }
+}
+
+task gradleWrapper(type: Wrapper) {
+    gradleVersion = '1.3'
+}
