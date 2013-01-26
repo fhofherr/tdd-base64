@@ -18,14 +18,7 @@ public class OctetRegrouper {
             int joinedOctets = joinOctets(firstThreeOctets);
             byte[] extractedGroups = extract6BitGroups(joinedOctets);
 
-            sixBitGroups = Arrays.copyOf(sixBitGroups, sixBitGroups.length + extractedGroups.length);
-            System.arraycopy(
-                    extractedGroups,
-                    0,
-                    sixBitGroups,
-                    sixBitGroups.length - extractedGroups.length,
-                    extractedGroups.length);
-
+            sixBitGroups = concat(sixBitGroups, extractedGroups);
             firstThreeOctets = getFirstThreeOctets(remainingOctets);
             remainingOctets = getRemainingOctets(remainingOctets);
         };
@@ -66,4 +59,16 @@ public class OctetRegrouper {
         sixBitGroups[3] = (byte) (joinedOctets & FOURTH_6_BIT);
         return sixBitGroups;
     }
+
+    private static byte[] concat(byte[] sixBitGroups, byte[] extractedGroups) {
+        sixBitGroups = Arrays.copyOf(sixBitGroups, sixBitGroups.length + extractedGroups.length);
+        System.arraycopy(
+                extractedGroups,
+                0,
+                sixBitGroups,
+                sixBitGroups.length - extractedGroups.length,
+                extractedGroups.length);
+        return sixBitGroups;
+    }
+
 }
