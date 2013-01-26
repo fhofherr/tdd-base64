@@ -8,6 +8,7 @@ public class OctetRegrouper {
     private static final int SECOND_6_BIT = 0x03F000;
     private static final int THIRD_6_BIT  = 0x000FC0;
     private static final int FOURTH_6_BIT = 0x00003F;
+    private static final int LAST_2_BIT   = 0x000003;
 
     public static byte[] regroup(byte[] inputOctets) {
         byte[] firstThreeOctets = getFirstThreeOctets(inputOctets);
@@ -22,6 +23,7 @@ public class OctetRegrouper {
             firstThreeOctets = getFirstThreeOctets(remainingOctets);
             remainingOctets = getRemainingOctets(remainingOctets);
         };
+        sixBitGroups = addPadding(remainingOctets, sixBitGroups);
 
         return sixBitGroups;
     }
@@ -35,10 +37,10 @@ public class OctetRegrouper {
     }
 
     private static byte[] getRemainingOctets(byte[] octets) {
-        if (3 < octets.length) {
+        if (3 <= octets.length) {
             return Arrays.copyOfRange(octets, 3, octets.length);
         } else {
-            return new byte[0];
+            return octets;
         }
     }
 
@@ -68,6 +70,20 @@ public class OctetRegrouper {
                 sixBitGroups,
                 sixBitGroups.length - extractedGroups.length,
                 extractedGroups.length);
+        return sixBitGroups;
+    }
+
+    private static byte[] addPadding(byte[] remainingOctets, byte[] sixBitGroups) {
+        if (remainingOctets.length == 1) {
+            int joinedOctets = joinOctets(remainingOctets);
+            byte[] extractedGroups = new byte[] {
+                (byte) (joinedOctets & THIRD_6_BIT >> 6),
+                (byte) (joinedOctets & LAST_2_BIT),
+                (byte) 0x40,
+                (byte) 0x40
+            };
+            sixBitGroups = concat(sixBitGroups, extractedGroups);
+        }
         return sixBitGroups;
     }
 
